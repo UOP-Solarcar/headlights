@@ -1,86 +1,77 @@
 #include <Arduino.h>
 
-const uint8_t RELAY_PIN_1 = 2;
-const uint8_t RELAY_PIN_2 = 3;
-const uint8_t RELAY_PIN_3 = 4;
-const uint8_t RELAY_PIN_4 = 5;
-const uint8_t RELAY_PIN_5 = 6;
-const uint8_t RELAY_PIN_6 = 7;
-const uint8_t RELAY_PIN_7 = 8;
-const uint8_t RELAY_PIN_8 = 9;
+const uint8_t TOGGLE_RIGHT_RED_PIN = 5;
+const uint8_t TOGGLE_RIGHT_GREEN_PIN = 6;
+const uint8_t TOGGLE_LEFT_RED_PIN = 5;
+const uint8_t TOGGLE_LEFT_BLUE_PIN = 7;
+const uint8_t TOGGLE_UP_WHITE_PIN = 8;
+const uint8_t TOGGLE_UP_YELLOW_PIN = 9;
+const uint8_t PUSH_BUTTON_BROWN_PIN = 10;
+const uint8_t PUSH_BUTTON_ORANGE_PIN = 11;
+
+const unsigned long debounceDelay = 50;  // debounce delay in milliseconds
+unsigned long lastDebounceTime = 0;
+
+bool lastToggleRightState = LOW;
+bool lastToggleLeftState = LOW;
+bool lastToggleUpState = LOW;
+bool lastPushButtonState = LOW;
 
 void setup() {
-    Serial.begin(9600);
-    
-    pinMode(RELAY_PIN_1, OUTPUT);
-    pinMode(RELAY_PIN_2, OUTPUT);
-    pinMode(RELAY_PIN_3, OUTPUT);
-    pinMode(RELAY_PIN_4, OUTPUT);
-    pinMode(RELAY_PIN_5, OUTPUT);
-    pinMode(RELAY_PIN_6, OUTPUT);
-    pinMode(RELAY_PIN_7, OUTPUT);
-    pinMode(RELAY_PIN_8, OUTPUT);
+  Serial.begin(9600);
 
-    // Initialize relay pins as off
-    digitalWrite(RELAY_PIN_1, HIGH);
-    digitalWrite(RELAY_PIN_2, HIGH);
-    digitalWrite(RELAY_PIN_3, HIGH);
-    digitalWrite(RELAY_PIN_4, HIGH);
-    digitalWrite(RELAY_PIN_5, HIGH);
-    digitalWrite(RELAY_PIN_6, HIGH);
-    digitalWrite(RELAY_PIN_7, HIGH);
-    digitalWrite(RELAY_PIN_8, HIGH);
-
+  pinMode(TOGGLE_RIGHT_RED_PIN, INPUT);
+  pinMode(TOGGLE_RIGHT_GREEN_PIN, INPUT);
+  pinMode(TOGGLE_LEFT_RED_PIN, INPUT);
+  pinMode(TOGGLE_LEFT_BLUE_PIN, INPUT);
+  pinMode(TOGGLE_UP_WHITE_PIN, INPUT);
+  pinMode(TOGGLE_UP_YELLOW_PIN, INPUT);
+  pinMode(PUSH_BUTTON_BROWN_PIN, INPUT);
+  pinMode(PUSH_BUTTON_ORANGE_PIN, INPUT);
 }
 
 void loop() {
-    // Cycle through relays
-    Serial.println("Turning on relay 1");
-    digitalWrite(RELAY_PIN_1, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 1");
-    digitalWrite(RELAY_PIN_1, HIGH);
+  unsigned long currentMillis = millis();
 
-    Serial.println("Turning on relay 2");
-    digitalWrite(RELAY_PIN_2, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 2");
-    digitalWrite(RELAY_PIN_2, HIGH);
+  bool toggleRightPressed = digitalRead(TOGGLE_RIGHT_RED_PIN) == HIGH && digitalRead(TOGGLE_RIGHT_GREEN_PIN) == HIGH;
+  bool toggleLeftPressed = digitalRead(TOGGLE_LEFT_RED_PIN) == HIGH && digitalRead(TOGGLE_LEFT_BLUE_PIN) == HIGH;
+  bool toggleUpPressed = digitalRead(TOGGLE_UP_WHITE_PIN) == HIGH && digitalRead(TOGGLE_UP_YELLOW_PIN) == HIGH;
+  bool pushButtonPressed = digitalRead(PUSH_BUTTON_BROWN_PIN) == HIGH && digitalRead(PUSH_BUTTON_ORANGE_PIN) == HIGH;
 
-    Serial.println("Turning on relay 3");
-    digitalWrite(RELAY_PIN_3, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 3");
-    digitalWrite(RELAY_PIN_3, HIGH);
+  if (toggleRightPressed != lastToggleRightState) {
+    lastDebounceTime = currentMillis;
+    lastToggleRightState = toggleRightPressed;
+  }
 
-    Serial.println("Turning on relay 4");
-    digitalWrite(RELAY_PIN_4, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 4");
-    digitalWrite(RELAY_PIN_4, HIGH);
+  if (toggleLeftPressed != lastToggleLeftState) {
+    lastDebounceTime = currentMillis;
+    lastToggleLeftState = toggleLeftPressed;
+  }
 
-    Serial.println("Turning on relay 5");
-    digitalWrite(RELAY_PIN_5, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 5");
-    digitalWrite(RELAY_PIN_5, HIGH);
+  if (toggleUpPressed != lastToggleUpState) {
+    lastDebounceTime = currentMillis;
+    lastToggleUpState = toggleUpPressed;
+  }
 
-    Serial.println("Turning on relay 6");
-    digitalWrite(RELAY_PIN_6, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 6");
-    digitalWrite(RELAY_PIN_6, HIGH);
+  if (pushButtonPressed != lastPushButtonState) {
+    lastDebounceTime = currentMillis;
+    lastPushButtonState = pushButtonPressed;
+  }
 
-    Serial.println("Turning on relay 7");
-    digitalWrite(RELAY_PIN_7, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 7");
-    digitalWrite(RELAY_PIN_7, HIGH);
+  if ((currentMillis - lastDebounceTime) > debounceDelay) {
+    if (toggleRightPressed) {
+      Serial.println("Toggle Right Pressed");
+    }
+    if (toggleLeftPressed) {
+      Serial.println("Toggle Left Pressed");
+    }
+    if (toggleUpPressed) {
+      Serial.println("Toggle Up Pressed");
+    }
+    if (pushButtonPressed) {
+      Serial.println("Push Button Pressed");
+    }
+  }
 
-    Serial.println("Turning on relay 8");
-    digitalWrite(RELAY_PIN_8, LOW);
-    delay(1000);
-    Serial.println("Turning off relay 8");
-    digitalWrite(RELAY_PIN_8, HIGH);
-
+  delay(10);
 }
